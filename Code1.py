@@ -56,17 +56,15 @@ def optimiseDist(longValL,latValL,productionValL,longValP,latValP):
         for j in range(0, len(latValL)):
             if i != j:
                 #calculate the distance and factor in the production volume                
-                dist = sqrt( (longValL[j] - longValL[i])**2 + (latValL[j] - latValL[i])**2)*productionValL[j]
+                dist = sqrt( (latValL[j] - latValL[i])**2 + (longValL[j] - longValL[i])**2)*productionValL[j]
                 #store the measure to the list productionDistance with long lat values                 
-                productionDistance.append([longValL[i],latValL[i],longValL[i],latValL[i],dist])
-                #used to check loop indexing working correctly and to sum values              
-                productionDistance1.append([longValL[i],latValL[i],dist])
+                productionDistance.append([longValL[i],latValL[i],longValL[j],latValL[j],dist])
     # 2nd  get this total summed value for each location      
     locationTotal=[]
-    data=np.asarray(productionDistance1)
+    data=np.asarray(productionDistance)
     for i in range(0, len(data),9):
-        locationTotal.append([data[i,0],data[i,1],sum(data[i:i+8,2])])
-    
+        locationTotal.append([data[i,0],data[i,1],sum(data[i:i+9,4])])
+    print locationTotal
     
     data=np.asarray(locationTotal)
     dataProduction=np.asarray(productionValL)
@@ -75,10 +73,11 @@ def optimiseDist(longValL,latValL,productionValL,longValP,latValP):
     overallResultsMatrix=[]
     for i in range(0, len(data)):
         for j in range(0, len(latValP)):
-            if i != j:
-                dist = sqrt( (longValL[j] - data[i,0])**2 + (longValL[j] - data[i,1])**2)*totalDataProduction+data[i,2]
+                dist = sqrt( (latValL[j] - data[i,1])**2 + (longValL[j] - data[i,0])**2)*totalDataProduction+data[i,2]
                 overallResultsMatrix.append([longValL[i],latValL[i],longValP[j],latValP[j],dist])
-     
+    
+    testPrint=np.asarray(overallResultsMatrix) 
+    print len(testPrint[:,0])
     
     return productionDistance1, overallResultsMatrix, locationTotal    
 
@@ -97,12 +96,12 @@ productionDistance1=np.asarray(productionDistance1)
 locationTotal=np.asarray(locationTotal)
 overallResultsMatrix=np.asarray(overallResultsMatrix)
 # print all the relevent output data for the text file report and final checks
-print productionDistance1
-print ""
-print locationTotal
-print ""
-print overallResultsMatrix
-print ""
+#print productionDistance1
+#print ""
+#print locationTotal
+#print ""
+#print overallResultsMatrix
+#print ""
 #get the final Result which is the lowest value
 minValue = min(overallResultsMatrix[:,4]) 
 minIndex=np.argmin(overallResultsMatrix[:,4])
