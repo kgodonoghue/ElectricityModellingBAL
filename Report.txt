@@ -1,27 +1,31 @@
 Goal 
-The goal of the project was to determine what the minimum transport cost was
-to transport the renewable fuel to to one central processing plant from all 
-locations and then subsequently determine which of these locations would work 
-best to reduce the overall transport cost when the port locatoin was included 
-in the optimisation problem.
-
+The goal of the project was to determine what the minimum transport cost was to transport the renewable fuel 
+from one central processing plant from all the raw material supply locations. The processed material would 
+then be subsequently transported to a port for shipping. There are 9 raw material locations/processing plants 
+and 3 ports and the overall goal is determine the optimal location for the processing plant and port.
 
 My method 
-2 main functions were developed to complete the project
-1. SQLconnect function which read all the data needed from the database
-2. An optimisation routine called XXXX then uses this data to come up with the lowest transport cost by
-	A. Get all the distances from each location to each other location and multiply by fuel volumne (Total 90)
-	B. Sum the total cost for each location excluding each location on itself 
-	C. Get the distance from each of the 10 locations to each of the 3 ports (30 combinations) and get the minimum value
-	   The equation used will be (Each value from B + distance to port*production volumne to transport)
+Two main python functions were developed to complete the project
+1. Firstly a function called “SQLconnect” was developed which reads all the data needed from the database. 
+This included all the location data and production volumes.
+2. An optimisation routine called “optimiseDist” then uses this data to come up with the lowest transport 
+cost through the following method
+A. The function gets all the distances from each location to each other location and multiplies this value by 
+fuel volume (Total of  90 results obtained)
+B. The function then sums the total cost for each location excluding each location on itself 
+C. The final part of the function is then to get the distance from each of the 10 locations to each of the 
+3 ports (30 combinations) and get the minimum overall cost value. The equation used will be 
+(Each value from B + distance to port*production processed volume to transport)
 
 Assumptions Made
 1. Use geometry and earth curvature does not need to be taken into acocunt for distance calculation.
+2. Direct point to point measurement will be used in the optimisation algorithm for measurement calculation 
+of distance (No road consideration will be considered)
 
 
 My solution 
 The following list of 30 potential solutions yielded the best solution which was 
 
-Long Location      Lat Location       Long Port       Lat Port           Final Minimum Value
+Long Location           Lat Location            Long Port                Lat Port           Final Minimum Value
 
-5.26600000e+01,   7.26000000e+00,   5.27000000e+01,    8.63000000e+00,      1.66037100e+06
+5.26600000e+01,         7.26000000e+00,         5.27000000e+01,          8.63000000e+00,      1.66037100e+06
