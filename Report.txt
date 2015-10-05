@@ -1,7 +1,7 @@
 Goal 
 The goal of the project was to determine what the minimum transport cost was to transport the renewable fuel 
 from one central processing plant from all the raw material supply locations. The processed material would 
-then be subsequently transported to a port for shipping. There are 9 raw material locations/processing plants 
+then be subsequently transported to a port for shipping. There are 10 raw material locations/processing plants 
 and 3 ports and the overall goal is determine the optimal location for the processing plant and port.
 
 My method 
@@ -20,12 +20,12 @@ C. The final part of the function is then to get the distance from each of the 1
 Assumptions Made
 1. Use geometry and earth curvature does not need to be taken into acocunt for distance calculation.
 2. Direct point to point measurement will be used in the optimisation algorithm for measurement calculation 
-of distance (No road consideration will be considered)
+of distance (No road consideration)
 
 
 My solution 
 The following list of 30 potential solutions yielded the best solution which was 
 
-Long Location           Lat Location            Long Port                Lat Port           Final Minimum Value
+Long Location           Lat Location            Long Port                Lat Port           Final Minimum Value 
 
 5.26600000e+01,         7.26000000e+00,         5.27000000e+01,          8.63000000e+00,      1.66037100e+06

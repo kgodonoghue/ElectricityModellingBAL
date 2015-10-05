@@ -1,5 +1,6 @@
 """
 Code for assignment one research Implementation
+Contains 3 seperate commits now
 """
 # import required libraries for the assignment
 import sqlite3
@@ -64,7 +65,7 @@ def optimiseDist(longValL,latValL,productionValL,longValP,latValP):
     data=np.asarray(productionDistance)
     for i in range(0, len(data),9):
         locationTotal.append([data[i,0],data[i,1],sum(data[i:i+9,4])])
-    print locationTotal
+    
     
     data=np.asarray(locationTotal)
     dataProduction=np.asarray(productionValL)
@@ -77,6 +78,7 @@ def optimiseDist(longValL,latValL,productionValL,longValP,latValP):
                 overallResultsMatrix.append([longValL[i],latValL[i],longValP[j],latValP[j],dist])
     
     testPrint=np.asarray(overallResultsMatrix) 
+    # print check for length check     
     print len(testPrint[:,0])
     
     return productionDistance1, overallResultsMatrix, locationTotal    
@@ -96,16 +98,17 @@ productionDistance1=np.asarray(productionDistance1)
 locationTotal=np.asarray(locationTotal)
 overallResultsMatrix=np.asarray(overallResultsMatrix)
 # print all the relevent output data for the text file report and final checks
-#print productionDistance1
-#print ""
-#print locationTotal
-#print ""
-#print overallResultsMatrix
-#print ""
+print productionDistance1
+print ""
+print locationTotal
+print ""
+print overallResultsMatrix
+print ""
 #get the final Result which is the lowest value
 minValue = min(overallResultsMatrix[:,4]) 
 minIndex=np.argmin(overallResultsMatrix[:,4])
 bestResult=[overallResultsMatrix[minIndex,:]]
+#print ""
 print bestResult
 
 
