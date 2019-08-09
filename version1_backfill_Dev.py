@@ -449,7 +449,6 @@ if __name__ == '__main__':
                 engine = create_engine('mysql+mysqldb://fergus:Uniwhite_8080@185.176.0.173:3306/smartpow_world', echo = False)
                 df_output.to_sql(name='Forecast_BAL_Dev', con=engine, if_exists = 'append', index=False)
          
-            count=count+1
             dt=dt+time_interval_test
    
  
