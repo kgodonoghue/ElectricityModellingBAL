@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Oct  2 18:26:16 2019
+
+@author: kgodo
+"""
+
 '''IDA1 closes at 5:30 and goes from 11pm tonight to 11pm tomorrow night. 
 
 IDA2 closes at 8am  and goes from 11am to 11pm
@@ -25,9 +32,9 @@ from sklearn.metrics import confusion_matrix
 import mysql.connector
 from sqlalchemy import create_engine
 from pandas.io import sql
-import MySQLdb
 import pymysql
 pymysql.install_as_MySQLdb()
+import MySQLdb
 import mysql.connector
 
 ''' train and test split function '''
@@ -75,7 +82,7 @@ def create_final_input_output(df_final,model_type):
 def createDF(user_name, passw, host_IP, database_name,dt):
     cnx = mysql.connector.connect(user=user_name, password=passw,host=host_IP, database=database_name)
     #smp table
-    df_smp = pd.read_sql('SELECT * FROM duos_tuos_semo_smp limit 100000,110000', cnx)
+    df_smp = pd.read_sql('SELECT * FROM duos_tuos_semo_smp_backup limit 100000,110000', cnx)
     df_smp=df_smp.iloc[start_smp_database:stop_smp_database]
     #window_smp_database = df_smp[df_smp['unix_date']==dt].index.values.astype(int)
     df_smp=df_smp.iloc[0:window_smp_database]
@@ -84,7 +91,9 @@ def createDF(user_name, passw, host_IP, database_name,dt):
     df_smp['hour'] = df_smp['hour'].apply(lambda x: x.zfill(2))
     df_smp['dates']=df_smp['dates'].astype(str)
     df_smp['dates'] = df_smp['dates'].str.replace("/", "")
-    df_smp['merge_variable'] = df_smp['dates'].astype(str) + df_smp['hour'].astype(str)    
+    df_smp['merge_variable'] = df_smp['dates'].astype(str) + df_smp['hour'].astype(str) 
+    
+    print('smp')
     
      
     #fuel table
@@ -106,6 +115,8 @@ def createDF(user_name, passw, host_IP, database_name,dt):
     df_metweather[df_metweather['location'] == 'Dublin']
     df_final=df_final.merge(df_metweather, how='left', on=['unix_date']) 
     df_final=df_final.drop_duplicates('unix_date')
+    
+    print('weather')
     
     #powerstation table
     df_powerstation=pd.read_sql('SELECT * FROM Units_Running', cnx)
@@ -152,15 +163,12 @@ def createDF(user_name, passw, host_IP, database_name,dt):
     df_final['DAM BAL Delta']=df_final['smp_d_minus_1']-df_final['smp_d_plus_4']
     df_final['DAM BAL Delta']=df_final['DAM BAL Delta'].apply(lambda x:0 if x<=0 else 1)
    
-    #labels_forecast=['TSORenewableForecast' ,'TSODemandForecast','smp_d_minus_1','WindForecastEirgrid','hour','GBP_DAM','NetPosition','IndexVolumes','CalculatedImbalance','NetInterconnectorSchedule','TotalPN','weekday']
-    #labels_historical_short=['smp_d_minus_1','sum_power','gas','smp_d_plus_4', 'MIX_COAL', 'MIX_GAS', 'MIX_NET_IMPORT', 'MIX_OTHER_FOSSIL', 'MIX_RENEW', 'MIX_TOTAL', 'FUEL_COAL', 'FUEL_GAS', 'FUEL_NET_IMPORT', 'FUEL_OTHER_FOSSIL', 'FUEL_RENEW', 'temperature_value', 'pressure_value', 'humidity']
-    #labels_historical_long=['smp_d_minus_1','sum_power','gas','smp_d_plus_4']
+    labels_forecast=['smp_d_minus_1','WindForecastEirgrid','hour','weekday']
+    labels_historical_short=['smp_d_plus_4','smp_d_minus_1','gas', 'temperature_value', 'pressure_value', 'humidity']
+    labels_historical_long=['smp_d_minus_1','gas']
     #labels_historical_short=labels_historical_short+list(power_stations_only)
     
-    labels_forecast=['smp_d_minus_1','WindForecastEirgrid','hour','weekday']
-    labels_historical_short=['smp_d_minus_1','gas','smp_d_plus_4', 'temperature_value', 'pressure_value', 'humidity']
-    labels_historical_long=['smp_d_plus_4']
-
+    print('done')
     
     all_labels=labels_forecast+labels_historical_short+labels_historical_long
     
@@ -179,7 +187,7 @@ def create_model_output(model_type,input_values_combined, output_values_range):
             pred_train= pred_train.ravel()
             pred_test= pred_test.ravel()
         return pred_train,pred_test,ytrain,ytest,clf
-  
+
 
 path_dukascopy =r'C:/main_folder/sql_modelling/dukascopy'
 root_path = r'C:/main_folder/sql_modelling'
@@ -197,7 +205,7 @@ start_smp_database=24000
 stop_smp_database=40000
 window_smp_database=15000
 model_list=['RF']
-number_days=10
+number_days=150 
 sample_interval=1
 back_test_file=0
 wait_delay=1800 
@@ -205,20 +213,21 @@ count=1
 test_window=96
 threshold=10
 next_day_delay=86400
+window=7200
 
 if __name__ == '__main__':
     
     import time
-    dt = datetime.datetime(2019, 9, 30 , 23 , 30 ) 
+    dt = datetime.datetime(2019, 12, 2  , 23 , 00 ) 
     dt=time.mktime(dt.timetuple())
-
+    start_time = time.time()
+    [all_labels,df_final,labels_forecast,labels_historical_short,labels_historical_long]=createDF(user_name, passw, host_IP, database_name,dt)
+    df_final['DAM BAL Delta']=df_final['smp_d_minus_1']-df_final['smp_d_plus_4']
+    
     for i in range(0,number_days,1):
         for model_type in model_list:
-            print(model_type)
-            start_time = time.time()
-            [all_labels,df_final,labels_forecast,labels_historical_short,labels_historical_long]=createDF(user_name, passw, host_IP, database_name,dt)
-            df_final1=df_final
-            df_final1['DAM BAL Delta']=df_final1['smp_d_minus_1']-df_final1['smp_d_plus_4']
+            df_final1=df_final.iloc[0:len(df_final)-window]
+            window=window-48
             [input_values_combined, output_values_range]=create_final_input_output(df_final1,model_type)
             [pred_train,pred_test,ytrain,ytest,clf]=create_model_output(model_type,input_values_combined, output_values_range)        
        
@@ -242,24 +251,25 @@ if __name__ == '__main__':
             df_output['Actual_Delta']=df_final1['DAM BAL Delta'].iloc[len(df_final1)-test_window:]
             df_output['Actual_Delta_Binary']=df_output['Actual_Delta'].apply(lambda x:0 if x<=0 else 1)
             df_DAM_prediction=df_output[df_output['Predicted_Delta']==1] 
+            #df_DAM_prediction['Actual_Delta'].cumsum().plot()
             df_output['WindForecastEirgrid']=df_final1['WindForecastEirgrid'].iloc[len(df_final1)-test_window:]
             sum_power=df_final1['sum_power'].iloc[len(df_final1)-test_window-forward_look_short:-forward_look_short]
             sum_power=np.array(sum_power)
             df_output['sum_power']=sum_power
             df_output['Date'] = df_output['Date'].astype(str)   
+            df_output['Date'] = df_output['Date'].apply(lambda x: x.zfill(8))
             df_output['Date'] = df_output['Date'].str[0:2]+'/'+df_output['Date'].str[2:4]+'/'+df_output['Date'].str[4:8]
             df_output =df_output.drop(df_output.index[0:-48])
             df_output.to_csv('df_output.csv',index=False,header=True)
 
-            
             #df_DAM_prediction['Actual_Delta'].cumsum().plot()
 
             if count==0:
                 engine = create_engine('mysql+mysqldb://fergus:Uniwhite_8080@185.176.0.173:3306/smartpow_world', echo = False)
-                df_output.to_sql(name='Forecast_BAL_Dev_IDA2', con=engine, if_exists = 'replace', index=False)
+                df_output.to_sql(name='Forecast_BAL_Dev_IDA1', con=engine, if_exists = 'replace', index=False)
             if count>0:
                 engine = create_engine('mysql+mysqldb://fergus:Uniwhite_8080@185.176.0.173:3306/smartpow_world', echo = False)
-                df_output.to_sql(name='Forecast_BAL_Dev_IDA2', con=engine, if_exists = 'append', index=False)
+                df_output.to_sql(name='Forecast_BAL_Dev_IDA1', con=engine, if_exists = 'append', index=False)
             
             dt=dt+next_day_delay
             
@@ -267,7 +277,8 @@ if __name__ == '__main__':
                 time.sleep(5)
                 stop_time = time.time()
                 print(stop_time-start_time)
-                if stop_time-start_time>next_day_delay:
+                #if stop_time-start_time>next_day_delay:
+                if stop_time-start_time>0:
                     break 
                 
             count=count+1
@@ -281,5 +292,7 @@ if __name__ == '__main__':
  
 
             
+            
+
             
             
